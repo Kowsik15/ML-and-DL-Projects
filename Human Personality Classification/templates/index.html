@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Classifier</title>
+	<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" type="image/png">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .form-logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .form-logo img {
+            width: 80px;
+            height: 80px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2c80b4;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-left: 5px solid #3498db;
+            border-radius: 6px;
+        }
+
+        .result h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Personality Icon">
+        </div>
+        <h1>Personality Classifier</h1>
+
+        <form method="POST">
+            <label for="time_spent_alone">Time Spent Alone (hours, 0–10):</label>
+            <input type="number" id="time_spent_alone" name="time_spent_alone" min="0" max="10" step="0.1" 
+                value="{{ original_input['Time Spent Alone'] if original_input else '' }}" required>
+
+            <label for="stage_fear">Stage Fear:</label>
+            <select id="stage_fear" name="stage_fear" required>
+                <option value="Yes" {% if original_input and original_input['Stage Fear'] == 'Yes' %}selected{% endif %}>Yes</option>
+                <option value="No"  {% if original_input and original_input['Stage Fear'] == 'No' %}selected{% endif %}>No</option>
+            </select>
+
+            <label for="social_event_attendance">Social Event Attendance (0–10):</label>
+            <input type="number" id="social_event_attendance" name="social_event_attendance" min="0" max="10" step="0.1"
+                value="{{ original_input['Social Event Attendance'] if original_input else '' }}" required>
+
+            <label for="going_outside">Going Outside (0–10):</label>
+            <input type="number" id="going_outside" name="going_outside" min="0" max="10" step="0.1"
+                value="{{ original_input['Going Outside'] if original_input else '' }}" required>
+
+            <label for="drained_after_socializing">Drained After Socializing:</label>
+            <select id="drained_after_socializing" name="drained_after_socializing" required>
+                <option value="Yes" {% if original_input and original_input['Drained After Socializing'] == 'Yes' %}selected{% endif %}>Yes</option>
+                <option value="No" {% if original_input and original_input['Drained After Socializing'] == 'No' %}selected{% endif %}>No</option>
+            </select>
+
+            <label for="friends_circle_size">Friends Circle Size (0–15):</label>
+            <input type="number" id="friends_circle_size" name="friends_circle_size" min="0" max="15" step="1"
+                value="{{ original_input['Friends Circle Size'] if original_input else '' }}" required>
+
+            <label for="post_frequency">Social Media Post Frequency (0–10):</label>
+            <input type="number" id="post_frequency" name="post_frequency" min="0" max="10" step="0.1"
+                value="{{ original_input['Post Frequency'] if original_input else '' }}" required>
+            
+            <label>Select Model:</label>
+            <select name="model_choice" required>
+                <option value="" disabled selected>Select a model</option>
+                <option value="rf" {% if original_input and original_input['Model Used'] == 'rf' %}selected{% endif %}>Random Forest</option>
+                <option value="logistic" {% if original_input and original_input['Model Used'] == 'logistic' %}selected{% endif %}>Logistic Regression</option>
+                <option value="knn" {% if original_input and original_input['Model Used'] == 'knn' %}selected{% endif %}>K-Nearest Neighbors</option>
+                <option value="svm" {% if original_input and original_input['Model Used'] == 'svm' %}selected{% endif %}>Support Vector Machine</option>
+                <option value="dt" {% if original_input and original_input['Model Used'] == 'dt' %}selected{% endif %}>Decision Tree</option>
+                <option value="xgb" {% if original_input and original_input['Model Used'] == 'xgb' %}selected{% endif %}>XGBoost</option>
+                <option value="ada" {% if original_input and original_input['Model Used'] == 'ada' %}selected{% endif %}>AdaBoost</option>
+            </select>
+
+            <input type="submit" value="Predict Personality">
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <h3>Input Values:</h3>
+            {% for variable, value in original_input.items() %}
+                <p>{{ variable }}: {{ value }}</p>
+            {% endfor %}
+            <h3>Predicted Personality:</h3>
+            <p><strong>{{ result }}</strong></p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
