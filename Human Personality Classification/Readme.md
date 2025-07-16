@@ -72,3 +72,17 @@ To build a multi-class classification model that can identify the **emotional or
 ---
 
 ## 📁 Repository Structure
+
+---
+
+## 🚀 Future Improvements
+- Add attention mechanism
+- Deploy as a Flask web app
+- Add more diverse behavioral classes
+
+---
+
+## ✍️ Author
+**Kowsik S**  
+PG in Data Science & Analytics | Embedded → AI Transition  
+[GitHub](https://github.com/Kowsik15) | [LinkedIn](https://www.linkedin.com/in/kowsik-s-645989181)
